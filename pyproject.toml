@@ -31,15 +31,17 @@ dev = ["databricks-connect==15.4.5",
        "marvelous@git+https://github.com/end-to-end-mlops-databricks-3/marvelous@0.1.0",
     ]
 
-test = [
-    "pre-commit>=4.1.0, <5",
-    "delta-spark==3.3.0",
-    "pyspark==3.5.5",
-    "pytest>=8.3.5",
-    "pytest-cov >=6.1.0",
-    "pydantic-settings>=2.8.1",
-    "marvelous@git+https://github.com/end-to-end-mlops-databricks-3/marvelous@0.1.0",
-]
+ test = [
+     "pre-commit>=4.1.0, <5",
+     "delta-spark==3.3.0",
+     "pyspark==3.5.5",
+     "pytest>=8.3.5",
+     "pytest-cov >=6.1.0",
+     "pydantic-settings>=2.8.1",
+-    "marvelous@git+https://github.com/end-to-end-mlops-databricks-3/marvelous@0.1.0",
++    "databricks-connect==15.4.5",        # ← add this line
++    "marvelous@git+https://github.com/end-to-end-mlops-databricks-3/marvelous@0.1.0",
+ ]
 
 [build-system]
 requires = ["setuptools>=72.0"]
