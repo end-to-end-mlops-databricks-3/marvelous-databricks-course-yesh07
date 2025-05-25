@@ -106,7 +106,9 @@ class TestHotelReservationPreprocessor:
         assert total_nights[0] == 3  # 1 weekend + 2 weekday
         assert total_nights[1] == 5  # 2 weekend + 3 weekday
 
-    @patch("mlops_course.preprocessing.hotel_reservation_preprocessor.HotelReservationPreprocessor.save_to_unity_catalog")
+    @patch(
+        "mlops_course.preprocessing.hotel_reservation_preprocessor.HotelReservationPreprocessor.save_to_unity_catalog"
+    )
     @patch("mlops_course.preprocessing.hotel_reservation_preprocessor.HotelReservationPreprocessor.load_data")
     def test_run_pipeline(self, mock_load_data, mock_save, config, spark, sample_data):
         """Test the full preprocessing pipeline."""
