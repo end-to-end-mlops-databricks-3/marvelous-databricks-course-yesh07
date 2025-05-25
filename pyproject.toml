@@ -80,6 +80,13 @@ lint.ignore = [
     "D213", # multi-line-summary-second-line
     "E501", # line-too-long
     "C901", # too complex
+    "D100", # Missing docstring in public module
+    "D104", # Missing docstring in public package
+    "ERA001", # commented out code
+    "ANN001", # Missing type annotation for function argument
+    "ANN201", # Missing return type annotation for public function
+    "ANN204", # Missing return type annotation for special method
+    "F841", # Local variable assigned but never used
 ]
 
 [tool.ruff.format]
