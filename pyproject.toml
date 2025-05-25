@@ -31,7 +31,6 @@ dev = ["databricks-connect==15.4.5",
        "marvelous@git+https://github.com/end-to-end-mlops-databricks-3/marvelous@0.1.0",
     ]
 
-[project.optional-dependencies]
 test = [
     "pre-commit>=4.1.0, <5",
     "delta-spark==3.3.0",
