@@ -38,11 +38,18 @@ def sample_data():
 
 @pytest.fixture
 def spark():
-    """Create a Databricks Connect session for testing."""
-    from databricks.connect import DatabricksSession
-
-    # This will use the Databricks Connect configuration from your CLI
-    return DatabricksSession.builder.getOrCreate()
+    """Create a Spark session for testing—use Databricks Connect if available, otherwise local PySpark."""
+    try:
+        from databricks.connect import DatabricksSession
+        return DatabricksSession.builder.getOrCreate()
+    except ImportError:
+        from pyspark.sql import SparkSession
+        return (
+            SparkSession.builder
+            .master("local[*]")
+            .appName("hotel-preprocessor-test")
+            .getOrCreate()
+        )
 
 
 @pytest.fixture
@@ -69,64 +76,45 @@ class TestHotelReservationPreprocessor:
     @patch("mlops_course.preprocessing.hotel_reservation_preprocessor.HotelReservationPreprocessor.load_data")
     def test_handle_missing_values(self, mock_load_data, config, spark, sample_data):
         """Test handling of missing values."""
-        # Create a preprocessor
         preprocessor = HotelReservationPreprocessor(config=config, spark=spark)
-
-        # Convert pandas DataFrame to Spark DataFrame for testing
         df = spark.createDataFrame(sample_data)
 
-        # Create a DataFrame with some missing values
         test_data = sample_data.copy()
         test_data.loc[0, "no_of_adults"] = None
         test_data.loc[1, "type_of_meal_plan"] = None
         spark_df_with_nulls = spark.createDataFrame(test_data)
 
-        # Process the DataFrame
         result_df = preprocessor.handle_missing_values(spark_df_with_nulls)
 
-        # Check that nulls were filled
         assert result_df.filter("no_of_adults IS NULL").count() == 0
         assert result_df.filter("type_of_meal_plan IS NULL").count() == 0
 
     @patch("mlops_course.preprocessing.hotel_reservation_preprocessor.HotelReservationPreprocessor.load_data")
     def test_create_engineered_features(self, mock_load_data, config, spark, sample_data):
         """Test creation of engineered features."""
-        # Create a preprocessor
         preprocessor = HotelReservationPreprocessor(config=config, spark=spark)
-
-        # Convert pandas DataFrame to Spark DataFrame for testing
         df = spark.createDataFrame(sample_data)
 
-        # Process the DataFrame
         result_df = preprocessor.create_engineered_features(df)
 
-        # Check that engineered features were created
         assert "total_nights" in result_df.columns
         assert "has_children" in result_df.columns
         assert "avg_price_per_person" in result_df.columns
         assert "season" in result_df.columns
 
-        # Check values
-        total_nights = result_df.select("total_nights").collect()
-        assert total_nights[0][0] == 3  # 1 weekend + 2 weekday
-        assert total_nights[1][0] == 5  # 2 weekend + 3 weekday
+        total_nights = [row[0] for row in result_df.select("total_nights").collect()]
+        assert total_nights[0] == 3  # 1 weekend + 2 weekday
+        assert total_nights[1] == 5  # 2 weekend + 3 weekday
 
-    @patch(
-        "mlops_course.preprocessing.hotel_reservation_preprocessor.HotelReservationPreprocessor.save_to_unity_catalog"
-    )
+    @patch("mlops_course.preprocessing.hotel_reservation_preprocessor.HotelReservationPreprocessor.save_to_unity_catalog")
     @patch("mlops_course.preprocessing.hotel_reservation_preprocessor.HotelReservationPreprocessor.load_data")
     def test_run_pipeline(self, mock_load_data, mock_save, config, spark, sample_data):
         """Test the full preprocessing pipeline."""
-        # Create a preprocessor
         preprocessor = HotelReservationPreprocessor(config=config, spark=spark)
-
-        # Mock the load_data method to return our test data
         df = spark.createDataFrame(sample_data)
         mock_load_data.return_value = df
 
-        # Run the pipeline
         result_df = preprocessor.run()
 
-        # Check that the pipeline completed and returned a DataFrame
         assert result_df is not None
         assert mock_save.called
