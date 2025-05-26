@@ -38,15 +38,14 @@ def sample_data():
 
 @pytest.fixture
 def spark():
-    """Create a Spark session for testing—use Databricks Connect if available, otherwise local PySpark."""
-    try:
-        from databricks.connect import DatabricksSession
-
-        return DatabricksSession.builder.getOrCreate()
-    except ImportError:
-        from pyspark.sql import SparkSession
-
-        return SparkSession.builder.master("local[*]").appName("hotel-preprocessor-test").getOrCreate()
+    """Always spin up a local SparkSession for unit tests."""
+    from pyspark.sql import SparkSession
+    return (
+        SparkSession.builder
+        .master("local[*]")
+        .appName("hotel-preprocessor-test")
+        .getOrCreate()
+    )
 
 
 @pytest.fixture
