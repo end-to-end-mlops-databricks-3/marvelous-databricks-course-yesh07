@@ -38,14 +38,10 @@ def sample_data():
 
 @pytest.fixture
 def spark():
-    """Always spin up a local SparkSession for unit tests."""
+    """Spin up a local SparkSession for unit tests."""
     from pyspark.sql import SparkSession
-    return (
-        SparkSession.builder
-        .master("local[*]")
-        .appName("hotel-preprocessor-test")
-        .getOrCreate()
-    )
+
+    return SparkSession.builder.master("local[*]").appName("hotel-preprocessor-test").getOrCreate()
 
 
 @pytest.fixture
